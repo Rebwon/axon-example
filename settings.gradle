@@ -1,0 +1,4 @@
+rootProject.name = 'axon-demo'
+include 'command'
+include 'common'
+include 'query'
