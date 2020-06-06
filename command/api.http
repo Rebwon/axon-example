@@ -2,9 +2,9 @@ POST http://localhost:8080/holder
 Content-Type: application/json
 
 {
-  "holderName" : "kevin",
-  "tel" : "02-1234-5678",
-  "address" : "OO시 OO구"
+  "holderName" : "rebwon",
+  "tel" : "031-1234-5678",
+  "address" : "서울시 강남구"
 }
 
 ###
@@ -13,7 +13,7 @@ POST http://localhost:8080/account
 Content-Type: application/json
 
 {
-  "holderId" : "a63dee13-3907-4fe7-b711-0fe689edfd1e"
+  "holderId" : "1b7fee33-9e6f-41c1-92c9-7ead9b3ca520"
 }
 
 ###
@@ -22,8 +22,8 @@ POST http://localhost:8080/deposit
 Content-Type: application/json
 
 {
-  "accountId" : "f0869db2-dbd1-43bf-aec6-683f13465513",
-  "holderId" : "a63dee13-3907-4fe7-b711-0fe689edfd1e",
+  "accountId" : "d9a625cd-c1f1-49b9-a73b-f05c4aeb2a57",
+  "holderId" : "1b7fee33-9e6f-41c1-92c9-7ead9b3ca520",
   "amount" : 300
 }
 
@@ -33,9 +33,11 @@ POST http://localhost:8080/withdrawal
 Content-Type: application/json
 
 {
-  "accountId" : "f0869db2-dbd1-43bf-aec6-683f13465513",
+  "accountId" : "d9a625cd-c1f1-49b9-a73b-f05c4aeb2a57",
   "holderId" : "a63dee13-3907-4fe7-b711-0fe689edfd1e",
   "amount" : 10
 }
 
 ###
+
+POST http://localhost:9090/reset

@@ -1,0 +1,81 @@
+package com.rebwon.query.projection;
+
+import java.time.Instant;
+import java.util.NoSuchElementException;
+
+import org.axonframework.config.ProcessingGroup;
+import org.axonframework.eventhandling.AllowReplay;
+import org.axonframework.eventhandling.EventHandler;
+import org.axonframework.eventhandling.ResetHandler;
+import org.axonframework.eventhandling.Timestamp;
+import org.springframework.stereotype.Component;
+
+import com.rebwon.events.AccountCreationEvent;
+import com.rebwon.events.DepositMoneyEvent;
+import com.rebwon.events.HolderCreationEvent;
+import com.rebwon.events.WithdrawMoneyEvent;
+import com.rebwon.query.entity.HolderAccountSummary;
+import com.rebwon.query.repository.AccountRepository;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Component
+@AllArgsConstructor
+@ProcessingGroup("accounts")
+public class HolderAccountProjection {
+	private final AccountRepository repository;
+
+	@EventHandler
+	@AllowReplay
+	protected void on(HolderCreationEvent event, @Timestamp Instant instant) {
+		log.debug("projecting {} , timestamp : {}", event, instant.toString());
+		HolderAccountSummary accountSummary = HolderAccountSummary.builder()
+			.holderId(event.getHolderId())
+			.name(event.getHolderName())
+			.address(event.getAddrees())
+			.tel(event.getTel())
+			.totalBalance(0L)
+			.accountCnt(0L)
+			.build();
+		repository.save(accountSummary);
+	}
+
+	@EventHandler
+	@AllowReplay
+	protected void on(AccountCreationEvent event, @Timestamp Instant instant){
+		log.debug("projecting {} , timestamp : {}", event, instant.toString());
+		HolderAccountSummary holderAccount = getHolderAccountSummary(event.getHolderId());
+		holderAccount.setAccountCnt(holderAccount.getAccountCnt()+1);
+		repository.save(holderAccount);
+	}
+
+	@EventHandler
+	@AllowReplay
+	protected void on(DepositMoneyEvent event, @Timestamp Instant instant){
+		log.debug("projecting {} , timestamp : {}", event, instant.toString());
+		HolderAccountSummary holderAccount = getHolderAccountSummary(event.getHolderId());
+		holderAccount.setTotalBalance(holderAccount.getTotalBalance() + event.getAmount());
+		repository.save(holderAccount);
+	}
+
+	@EventHandler
+	@AllowReplay
+	protected void on(WithdrawMoneyEvent event, @Timestamp Instant instant){
+		log.debug("projecting {} , timestamp : {}", event, instant.toString());
+		HolderAccountSummary holderAccount = getHolderAccountSummary(event.getHolderID());
+		holderAccount.setTotalBalance(holderAccount.getTotalBalance() - event.getAmount());
+		repository.save(holderAccount);
+	}
+
+	private HolderAccountSummary getHolderAccountSummary(String holderId) {
+		return repository.findByHolderId(holderId)
+			.orElseThrow(() -> new NoSuchElementException("소유주가 존재하지 않습니다."));
+	}
+
+	@ResetHandler
+	private void resetHolderAccountInfo() {
+		log.debug("reset triggered");
+		repository.deleteAll();
+	}
+}

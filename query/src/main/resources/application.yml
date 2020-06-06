@@ -19,3 +19,11 @@ axon:
     general: xstream
   axonserver:
     servers: localhost:8124
+
+logging:
+  level:
+    com:
+      rebwon:
+        query: debug
+    org:
+      axonframework: debug
