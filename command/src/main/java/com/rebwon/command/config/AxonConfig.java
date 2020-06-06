@@ -1,6 +1,8 @@
 package com.rebwon.command.config;
 
 import org.axonframework.commandhandling.SimpleCommandBus;
+import org.axonframework.common.caching.Cache;
+import org.axonframework.common.caching.WeakReferenceCache;
 import org.axonframework.common.transaction.TransactionManager;
 import org.axonframework.eventsourcing.AggregateFactory;
 import org.axonframework.eventsourcing.AggregateSnapshotter;
@@ -21,10 +23,10 @@ import com.rebwon.command.aggregate.AccountAggregate;
 @Configuration
 @AutoConfigureAfter(AxonAutoConfiguration.class)
 public class AxonConfig {
-	@Bean
+	/*@Bean
 	SimpleCommandBus commandBus(TransactionManager transactionManager) {
 		return SimpleCommandBus.builder().transactionManager(transactionManager).build();
-	}
+	}*/
 
 	@Bean
 	public AggregateFactory<AccountAggregate> aggregateFactory() {
@@ -48,11 +50,17 @@ public class AxonConfig {
 	}
 
 	@Bean
-	public Repository<AccountAggregate> accountAggregateRepository(EventStore eventStore, SnapshotTriggerDefinition snapshotTriggerDefinition){
+	public Cache cache() {
+		return new WeakReferenceCache();
+	}
+
+	@Bean
+	public Repository<AccountAggregate> accountAggregateRepository(EventStore eventStore, SnapshotTriggerDefinition snapshotTriggerDefinition, Cache cache){
 		return EventSourcingRepository
 			.builder(AccountAggregate.class)
-			.eventStore(eventStore)
-			.snapshotTriggerDefinition(snapshotTriggerDefinition)
+				.eventStore(eventStore)
+				.snapshotTriggerDefinition(snapshotTriggerDefinition)
+				.cache(cache)
 			.build();
 	}
 }
