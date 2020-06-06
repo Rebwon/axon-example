@@ -10,24 +10,28 @@ import org.axonframework.spring.stereotype.Aggregate;
 import com.rebwon.command.commands.HolderCreationCommand;
 import com.rebwon.events.HolderCreationEvent;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
 @Aggregate
+@Slf4j
 public class HolderAggregate {
 	@AggregateIdentifier
-	private String holderID;
+	private String holderId;
 	private String holderName;
 	private String tel;
 	private String address;
 
 	@CommandHandler
 	public HolderAggregate(HolderCreationCommand command) {
+		log.debug("handling {}", command);
 		apply(new HolderCreationEvent(command.getHolderId(), command.getHolderName(), command.getTel(), command.getAddress()));
 	}
 
 	@EventSourcingHandler
 	protected void createAccount(HolderCreationEvent event) {
-		this.holderID = event.getHolderId();
+		log.debug("applying {}", event);
+		this.holderId = event.getHolderId();
 		this.holderName = event.getHolderName();
 		this.tel = event.getTel();
 		this.address = event.getAddrees();
