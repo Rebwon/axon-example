@@ -13,7 +13,7 @@ POST http://localhost:8080/account
 Content-Type: application/json
 
 {
-  "holderID" : "계정 생성 후 반환되는 UUID"
+  "holderId" : "a63dee13-3907-4fe7-b711-0fe689edfd1e"
 }
 
 ###
@@ -22,8 +22,8 @@ POST http://localhost:8080/deposit
 Content-Type: application/json
 
 {
-  "accountID" : "계좌 생성 후 반환되는 UUID",
-  "holderID" : "계정 생성 후 반환되는 UUID",
+  "accountId" : "f0869db2-dbd1-43bf-aec6-683f13465513",
+  "holderId" : "a63dee13-3907-4fe7-b711-0fe689edfd1e",
   "amount" : 300
 }
 
@@ -33,8 +33,8 @@ POST http://localhost:8080/withdrawal
 Content-Type: application/json
 
 {
-  "accountID" : "계좌 생성 후 반환되는 UUID",
-  "holderID" : "계정 생성 후 반환되는 UUID",
+  "accountId" : "f0869db2-dbd1-43bf-aec6-683f13465513",
+  "holderId" : "a63dee13-3907-4fe7-b711-0fe689edfd1e",
   "amount" : 10
 }
 
