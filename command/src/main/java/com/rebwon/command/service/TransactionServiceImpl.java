@@ -26,7 +26,8 @@ public class TransactionServiceImpl implements TransactionService {
 		return commandGateway.send(new HolderCreationCommand(UUID.randomUUID().toString(),
 			holderPayload.getHolderName(),
 			holderPayload.getTel(),
-			holderPayload.getAddress()));
+			holderPayload.getAddress(),
+			holderPayload.getCompany()));
 	}
 
 	@Override

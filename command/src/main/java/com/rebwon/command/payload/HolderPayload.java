@@ -11,4 +11,5 @@ public class HolderPayload {
 	private String holderName;
 	private String tel;
 	private String address;
+	private String company;
 }

@@ -25,7 +25,8 @@ public class HolderAggregate {
 	@CommandHandler
 	public HolderAggregate(HolderCreationCommand command) {
 		log.debug("handling {}", command);
-		apply(new HolderCreationEvent(command.getHolderId(), command.getHolderName(), command.getTel(), command.getAddress()));
+		apply(new HolderCreationEvent(command.getHolderId(), command.getHolderName(),
+			command.getTel(), command.getAddress(), command.getCompany()));
 	}
 
 	@EventSourcingHandler
