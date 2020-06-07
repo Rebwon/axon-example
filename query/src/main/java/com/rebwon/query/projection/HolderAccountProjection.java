@@ -8,6 +8,9 @@ import org.axonframework.eventhandling.AllowReplay;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.ResetHandler;
 import org.axonframework.eventhandling.Timestamp;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import com.rebwon.events.AccountCreationEvent;
@@ -21,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
+@EnableRetry
 @AllArgsConstructor
 @ProcessingGroup("accounts")
 public class HolderAccountProjection {
@@ -43,6 +47,7 @@ public class HolderAccountProjection {
 
 	@EventHandler
 	@AllowReplay
+	@Retryable(value = {NoSuchElementException.class}, maxAttempts = 5, backoff = @Backoff(delay = 1000))
 	protected void on(AccountCreationEvent event, @Timestamp Instant instant){
 		log.debug("projecting {} , timestamp : {}", event, instant.toString());
 		HolderAccountSummary holderAccount = getHolderAccountSummary(event.getHolderId());
@@ -69,6 +74,7 @@ public class HolderAccountProjection {
 	}
 
 	private HolderAccountSummary getHolderAccountSummary(String holderId) {
+		log.debug("getHolder : {} ", holderId);
 		return repository.findByHolderId(holderId)
 			.orElseThrow(() -> new NoSuchElementException("소유주가 존재하지 않습니다."));
 	}
