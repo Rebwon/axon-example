@@ -8,6 +8,8 @@ import org.axonframework.eventhandling.AllowReplay;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.eventhandling.ResetHandler;
 import org.axonframework.eventhandling.Timestamp;
+import org.axonframework.queryhandling.QueryHandler;
+import org.axonframework.queryhandling.QueryUpdateEmitter;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.retry.annotation.Retryable;
@@ -18,6 +20,7 @@ import com.rebwon.events.DepositMoneyEvent;
 import com.rebwon.events.HolderCreationEvent;
 import com.rebwon.events.WithdrawMoneyEvent;
 import com.rebwon.query.entity.HolderAccountSummary;
+import com.rebwon.query.query.AccountQuery;
 import com.rebwon.query.repository.AccountRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 @ProcessingGroup("accounts")
 public class HolderAccountProjection {
 	private final AccountRepository repository;
+	private final QueryUpdateEmitter queryUpdateEmitter;
 
 	@EventHandler
 	@AllowReplay
@@ -61,6 +65,11 @@ public class HolderAccountProjection {
 		log.debug("projecting {} , timestamp : {}", event, instant.toString());
 		HolderAccountSummary holderAccount = getHolderAccountSummary(event.getHolderId());
 		holderAccount.setTotalBalance(holderAccount.getTotalBalance() + event.getAmount());
+
+		queryUpdateEmitter.emit(AccountQuery.class,
+			query -> query.getHolderId().equals(event.getHolderId()),
+			holderAccount);
+
 		repository.save(holderAccount);
 	}
 
@@ -70,6 +79,11 @@ public class HolderAccountProjection {
 		log.debug("projecting {} , timestamp : {}", event, instant.toString());
 		HolderAccountSummary holderAccount = getHolderAccountSummary(event.getHolderID());
 		holderAccount.setTotalBalance(holderAccount.getTotalBalance() - event.getAmount());
+
+		queryUpdateEmitter.emit(AccountQuery.class,
+			query -> query.getHolderId().equals(event.getHolderID()),
+			holderAccount);
+
 		repository.save(holderAccount);
 	}
 
@@ -83,5 +97,11 @@ public class HolderAccountProjection {
 	private void resetHolderAccountInfo() {
 		log.debug("reset triggered");
 		repository.deleteAll();
+	}
+
+	@QueryHandler
+	public HolderAccountSummary on(AccountQuery query) {
+		log.debug("handling {}", query);
+		return repository.findByHolderId(query.getHolderId()).orElse(null);
 	}
 }
